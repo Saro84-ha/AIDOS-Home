@@ -1,4 +1,4 @@
-"""AIDOS Home 0.3: ingress application. Python standard library only.
+"""AIDOS Home 0.5: ingress application. Python standard library only.
 
 Private settings remain under /data; Supervisor credential never sent to client.
 """
@@ -26,14 +26,14 @@ VALID_ID = re.compile(r'^[a-z][a-z0-9_]*\.[a-zA-Z0-9_]+$')
 VALID_DOMAIN = re.compile(r'^[a-z][a-z0-9_]*$')
 SENSITIVE_DOMAINS = {'lock','alarm_control_panel','cover','button','script','automation'}
 DEFAULT = {
-    'title': 'AIDOS Home', 'theme': 'dark', 'accent': '#62c7e9',
+    'title': 'AIDOS Home', 'theme': 'dark', 'accent': '#4ec7c9',
     'pages': [
-        {'id':'home','name':'Home','icon':'⌂'},
-        {'id':'cctv','name':'CCTV','icon':'▣'},
-        {'id':'heating','name':'Heating System','icon':'♨'},
-        {'id':'status','name':'Status','icon':'◉'},
-        {'id':'entertainment','name':'Entertainment','icon':'♫'},
-        {'id':'lights','name':'Light','icon':'☀'},
+        {'id':'home','name':'Panoramica','icon':'⌂'},
+        {'id':'cctv','name':'Telecamere','icon':'▣'},
+        {'id':'heating','name':'Clima','icon':'♨'},
+        {'id':'status','name':'Sicurezza e stato','icon':'◉'},
+        {'id':'entertainment','name':'Multimedia','icon':'♫'},
+        {'id':'lights','name':'Illuminazione','icon':'☀'},
         {'id':'statistics','name':'Statistiche','icon':'▥'},
     ],
     'cards': [],
@@ -52,7 +52,7 @@ def clean_settings(obj):
     result['title'] = str(obj.get('title', result['title']))[:80]
     result['theme'] = obj.get('theme') if obj.get('theme') in ('dark','light') else 'dark'
     accent = obj.get('accent', result['accent'])
-    result['accent'] = accent if isinstance(accent, str) and re.fullmatch(r'#[0-9a-fA-F]{6}',accent) else '#62c7e9'
+    result['accent'] = accent if isinstance(accent, str) and re.fullmatch(r'#[0-9a-fA-F]{6}',accent) else '#4ec7c9'
     pages = obj.get('pages', result['pages'])
     if not isinstance(pages, list) or len(pages)>50: raise ValueError('Pagine non valide')
     ids = set()
@@ -211,16 +211,16 @@ class Handler(BaseHTTPRequestHandler):
         path=urllib.parse.urlsplit(self.path).path
         try:
             if path in ('/api/health','/health'):
-                return self.respond(200,{'ok':True,'version':'0.4.0','ha_configured':bool(API_TOKEN)})
+                return self.respond(200,{'ok':True,'version':'0.5.0','ha_configured':bool(API_TOKEN)})
             if path=='/api/settings':return self.respond(200,read_settings())
             if path=='/api/states':return self.respond(200,ha_request('GET','states'))
             if path=='/api/agents':return self.respond(200,ha_request('GET','conversation/agents'))
             if path.startswith('/api/'):return self.respond(404,{'error':'Percorso inesistente'})
-            asset={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css'}.get(path)
+            asset={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/catalog.json':'catalog.json'}.get(path)
             if not asset:return self.respond(404,{'error':'Non trovato'})
             data=(STATIC/asset).read_bytes()
             self.send_response(200)
-            self.send_header('Content-Type',{'index.html':'text/html; charset=utf-8','app.js':'application/javascript; charset=utf-8','style.css':'text/css; charset=utf-8'}[asset])
+            self.send_header('Content-Type',{'index.html':'text/html; charset=utf-8','app.js':'application/javascript; charset=utf-8','style.css':'text/css; charset=utf-8','catalog.json':'application/json; charset=utf-8'}[asset])
             self.send_header('Cache-Control','no-store')
             self.send_header('X-Content-Type-Options','nosniff')
             self.send_header('Content-Security-Policy',"default-src 'self'; style-src 'self'; script-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self'")

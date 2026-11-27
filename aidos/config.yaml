@@ -1,7 +1,7 @@
 name: AIDOS Home
-version: "0.4.0"
+version: "0.5.0"
 slug: aidos
-description: "Dashboard domestica modulare per Home Assistant con notifiche e assistente Conversation"
+description: "Dashboard card-first per Home Assistant, template AIDOS, notifiche e assistente"
 arch:
   - amd64
   - aarch64

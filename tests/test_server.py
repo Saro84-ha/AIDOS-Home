@@ -10,6 +10,8 @@ class SettingsTests(unittest.TestCase):
         c=server.clean_settings({})
         self.assertFalse(c['notifications']['enabled'])
         self.assertEqual(len(c['pages']),7)
+        self.assertEqual(c['cards'],[])
+        self.assertEqual(c['layout'],{})
     def test_notification_service_restricted(self):
         c=server.clean_settings({'notifications':{'enabled':True,'service':'lock.unlock'}})
         self.assertEqual(c['notifications']['service'],'persistent_notification.create')
@@ -20,6 +22,9 @@ class SettingsTests(unittest.TestCase):
     def test_bad_card_is_ignored(self):
         c=server.clean_settings({'cards':[{'id':'one','page':'home','entity_id':'invalid/entity'}]})
         self.assertEqual(c['cards'],[])
+    def test_oikos_named_card_type(self):
+        c=server.clean_settings({'cards':[{'id':'one','page':'home','entity_id':'climate.living_room','type':'thermostat'}]})
+        self.assertEqual(c['cards'][0]['type'],'thermostat')
     def test_io(self):
         with tempfile.TemporaryDirectory() as d:
             old=server.DATA;server.DATA=Path(d)

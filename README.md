@@ -1,34 +1,47 @@
-# AIDOS Home 0.4.0
+# AIDOS Home 0.5.0
 
-Dashboard indipendente per Home Assistant Supervisor, con interfaccia originale ispirata all'organizzazione delle pagine Oikos.
+Dashboard indipendente, con installazione tramite Home Assistant Apps e aggiornamenti via GitHub. Compatibile con Home Assistant Supervisor, incluso il tuo Debian 12.
 
-## Funzionalità
-- Layout a righe / colonne con importazione delle sette pagine e delle associazioni alle schede da un backup personale Oikos.
-- Oltre 40 categorie di template; alcune card importate sono visualizzazioni generiche e richiedono collegamento manuale a entità HA.
-- Comandi HA per luci, clima, serrature, tapparelle, media, switch e dispositivi supportati.
-- Notifiche **Menu → Impostazioni → Notifiche**, disabilitate di default, e controllo per card.
-- Assistente AI tramite API Conversation di Home Assistant (agente HA da configurare).
-- Configurazione persistente in `/data` e import/export privato dalla dashboard.
+## Che cosa cambia
 
-## Aggiornamento da 0.3
-1. Conservare una copia della configurazione AIDOS usando Impostazioni → Esporta.
-2. Copiare i file di questa cartella nella directory locale GitHub `AIDOS-Home`, **senza copiare il backup Oikos**.
-3. GitHub Desktop → Commit → Push origin.
-4. In Home Assistant → Apps → AIDOS Home, aggiornare alla 0.4.0 (potrebbe occorrere ricaricare il catalogo).
-5. Mantenere Oikos installato: non è coinvolto dalla procedura.
+- Nuovo design dark e card compatte, **ispirato** all'organizzazione e alle anteprime condivise di Oikos (non una copia del runtime Oikos).
+- Catalogo di **25 modelli di card** con nomi e categorie derivati dai manifest del tuo backup `oikos.tar.gz`.
+- Widget con rendering dedicato per luci, termostati, climatizzazione, temperatura, UPS, sicurezze, tapparelle, media e robot; gli altri modelli mostrano dati delle entità associate in stile AIDOS, non tutte le funzionalità Oikos originali.
+- **Entità selezionate in tempo reale** dall'inventario Home Assistant, filtrate per dominio compatibile. Le card sono configurate in AIDOS.
+- Nuove installazioni: **sette pagine senza card**. Nessun import JSON e nessun dato Oikos personale.
+- Impostazioni persistenti nell'app `/data/settings.json`, gestite automaticamente. In un aggiornamento di un'installazione esistente la configurazione precedente viene conservata. Per ripartire da zero: Impostazioni → Sistema → Azzera card AIDOS.
+- Notifiche: Impostazioni → Notifiche, poi switch nelle singole card. Monitoraggio periodico, non istantaneo.
+- Chat Conversation di Home Assistant, con possibile agente AI configurato in Home Assistant.
+- Spostamento card a sinistra/destra con frecce nella base della scheda.
 
-## Importazione privata delle tue dashboard Oikos
-**Non aggiungere il backup `oikos.tar.gz` o il JSON esportato al repository pubblico.**
+## Installazione / aggiornamento
 
-Sul tuo PC Windows, se Python è installato, apri PowerShell in una cartella **fuori dal repository** e lancia:
+1. Estrai lo ZIP e copia **i contenuti della cartella** nella radice di `AIDOS-Home` sul tuo GitHub Desktop, sostituendo la v0.4.0.
+2. Verifica `repository.yaml`: l'URL deve puntare al **tuo** repository.
+3. GitHub Desktop: `Commit to main` → `Push origin`.
+4. Home Assistant → Impostazioni → Apps → Store → ⋮ → Controlla aggiornamenti (o ricarica repository); aggiorna AIDOS alla **0.5.0**.
+5. Avvia e controlla i log dell'app. Apri **AIDOS** dal pannello laterale.
 
-```powershell
-py "C:\Users\rgian\Documents\GitHub\AIDOS-Home\tools\import_oikos.py" "C:\percorso\privato\oikos.tar.gz" --output "C:\percorso\privato\AIDOS-settings-PRIVATE.json"
+Nessun file con credenziali o impostazioni HA del tuo ambiente va caricato su GitHub.
+
+## Compatibilità e limiti
+
+- Le card originarie di Oikos incluse nel backup non sono state copiate: i codici inclusi nel backup non presentano tutti una licenza riutilizzabile verificata. Per questo AIDOS implementa un proprio frontend e proprio backend.
+- Le card specialistiche (es. video live, mappa robot, allarme PIN, grafici storici avanzati, shopping/TMDB, notifica push critica) **non sono ancora equivalenti** alle card Oikos. Nessuna funzione non realizzata è presentata come funzionante.
+- La categoria sensori non sempre esprime la tipologia del dispositivo: verifica che il dominio dell'entità scelta sia coerente.
+- AIDOS v0.5 non abilita automaticamente allarmi o notifiche critiche. Le chiamate di servizio alle entità sensibili richiedono conferma dell'utente.
+
+## Privacy e licenze
+
+- Nessun token, host privato, configurazione, backup delle entità Oikos o password presente nei tuoi archivi viene distribuito.
+- I metadati del catalogo sono utilizzati come riferimento; **non viene incluso il codice originale di Oikos**.
+- Il kit `oikos-card-starter-main(2).zip` che hai fornito include una licenza MIT (Copyright 2026 Oikos community) e descrive la separazione tra manifest, card e settings. AIDOS non incorpora il suo runtime o SDK; ove si riutilizzasse in futuro codice sostanziale da quel kit, conserveremo attribuzioni e licenza MIT.
+
+## Sviluppo
+
+```bash
+python -m unittest discover -s tests -v
+node --check aidos/app/static/app.js
 ```
 
-Sostituisci i percorsi con quelli reali, quindi in AIDOS apri **Impostazioni → Importa configurazione** e seleziona il JSON. L'importazione sostituisce le impostazioni AIDOS correnti: effettua un'esportazione preventiva.
-
-## Privacy e limiti
-Questo repository contiene **solo codice originale AIDOS**. L'importer legge il backup locale e importa esclusivamente la disposizione delle pagine, i nomi delle card e una singola entità per scheda dove identificabile. Non importa codice Oikos, i suoi bundle commerciali, i plugin, licenze, password, URL privati, token né gli asset grafici. Gli ID delle entità possono essere informazioni private: non pubblicare l'output dell'importer.
-
-La ricostruzione delle card avanzate di Oikos (grafici complessi, pop-up interattivi, layout speciali e CCTV live) non è completa; per queste funzioni sono necessarie ulteriori implementazioni originali e verifiche su Home Assistant reale. Non è stato eseguito un test end-to-end con l'istanza domestica.
+Il server usa solo librerie standard Python. Home Assistant Core rimane il backend per stati e comandi; il Supervisor token rimane sul server e non viene trasmesso al browser.

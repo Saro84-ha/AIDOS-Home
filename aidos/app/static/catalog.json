@@ -1,0 +1,127 @@
+[
+  {
+    "id": "air-quality",
+    "name": "Qualità dell'aria",
+    "description": "Card qualità aria: AQI con zone colorate, classificazione, grafico 24h smooth."
+  },
+  {
+    "id": "alarm",
+    "name": "Allarme",
+    "description": "Pannello allarme (alarm_control_panel): arma Casa / Notte / Fuori, disarma, tastierino PIN (richiesto da Home Assistant o PIN locale della card, utile con Tuya) e stato a colpo d'occhio. Com"
+  },
+  {
+    "id": "alexa",
+    "name": "Alexa",
+    "description": "Controllo multi-dispositivo Alexa: lista con volume e play rapidi, foglio Musica per far suonare Amazon Music (o Spotify, Apple Music, Deezer, TuneIn) su uno o più Echo con preset e copertin"
+  },
+  {
+    "id": "appliance",
+    "name": "Elettrodomestico",
+    "description": "Monitor elettrodomestici: consumo live, costo ciclo, storico giornaliero/settimanale/mensile/annuale, popup globale a fine ciclo, animazioni in funzione. Auto-installa package HA con suffiss"
+  },
+  {
+    "id": "calendario-card",
+    "name": "Calendario",
+    "description": "Card calendario in italiano con eventi Home Assistant, prenotazioni multi-giorno e notifiche verso servizi notify configurabili."
+  },
+  {
+    "id": "cameras",
+    "name": "Telecamere",
+    "description": "Visore telecamere di sicurezza: vista singola o multipla con una principale grande e le miniature cliccabili per cambiare al volo. Snapshot ravvicinati per un effetto live, fullscreen e aper"
+  },
+  {
+    "id": "cancello-giardino",
+    "name": "Cancello Giardino",
+    "description": "Oikos card to open, stop and close a Home Assistant cover gate."
+  },
+  {
+    "id": "climatizzatore",
+    "name": "Climatizzatore",
+    "description": "Controllo completo climatizzatore HA: power, modalità (cool/heat/auto/dry/fan), target ±, fan speed, temperatura corrente e umidità. Icona animata e tema colore dinamico per modalità attiva."
+  },
+  {
+    "id": "clock",
+    "name": "Clock",
+    "description": "Orologio digitale con ticks counter. Dimostra useCardConfig e useStyles."
+  },
+  {
+    "id": "covers",
+    "name": "Tapparelle",
+    "description": "Controllo tapparelle, serrande e tende (cover.*): rilevamento automatico o lista manuale, posizione % con slider, su / stop / giù per ognuna e controlli 'tutte'. Icone per tipo (tapparella, "
+  },
+  {
+    "id": "hazard-detectors",
+    "name": "Fumo, Gas e Allagamento",
+    "description": "Rilevatori di fumo, monossido, gas e allagamento in un'unica card: li trova da sola, mostra stanza, batteria e stato. In allarme lo schermo lampeggia su ogni dashboard aperta con sirena e pu"
+  },
+  {
+    "id": "light-control",
+    "name": "Light Control",
+    "description": "Controllo luce HA: on/off, luminosità, colore e temperatura con chip caldo/freddo; layout Cerchi, Barre, Pill o Semplice."
+  },
+  {
+    "id": "lista-della-spesa",
+    "name": "Lista della Spesa",
+    "description": "Card per gestire la lista della spesa con traduzione automatica italiano-polacco."
+  },
+  {
+    "id": "mailbox-card",
+    "name": "Cassetta delle Lettere",
+    "description": "Cassetta delle lettere: contatore giornaliero + popup elaborato self-contained con buste volanti (funziona anche quando la dashboard è chiusa, via watcher auto-registrato). Compatibile con p"
+  },
+  {
+    "id": "media-player",
+    "name": "Media Player",
+    "description": "Controllo media player: copertina, brano e artista, play/pausa/skip, barra di avanzamento, volume e selezione sorgente. Sfondo sfocato dalla copertina."
+  },
+  {
+    "id": "openings",
+    "name": "Porte e Finestre",
+    "description": "Stato di porte, finestre e basculanti: rileva in automatico i sensori di apertura e mostra a colpo d'occhio cosa è aperto, con tempo trascorso e riepilogo 'tutto chiuso'. Click su una riga p"
+  },
+  {
+    "id": "person",
+    "name": "Persona",
+    "description": "Card persona HA: avatar, zona, batteria, passi/km guidati. Layout split con mappa Google Maps live sul lato destro (sfumatura graduale tra info e mappa), campo dedicato per il device_tracker"
+  },
+  {
+    "id": "raccolta-differenziata-plus",
+    "name": "Raccolta Differenziata Plus",
+    "description": "Fix notifiche automatiche senza sensori template unknown/unavailable."
+  },
+  {
+    "id": "robot-dream-a1-pro",
+    "name": "Robot - Dream A1 Pro",
+    "description": "Day style Oikos card for Dream A1 Pro lawn mower with status, battery, map, runtime, area and detailed popup."
+  },
+  {
+    "id": "room-sensor",
+    "name": "Room Sensor",
+    "description": "Card sensore stanza: gauge multipli, flow chart storico, badge numerici, mini-gauge batteria/segnale."
+  },
+  {
+    "id": "thermostat",
+    "name": "Termostato",
+    "description": "Gauge 270° con gradiente blu→arancione per termostato HA. Slider target, toggle on/off, multi-mode."
+  },
+  {
+    "id": "ups-monitor",
+    "name": "Monitor UPS",
+    "description": "Card personale per monitoraggio UPS Tecnoware tramite sensori NUT."
+  },
+  {
+    "id": "vacuum",
+    "name": "Dreame Vacuum",
+    "description": "Card Dreame Vacuum con UI ispirata all'app ufficiale: mappa, sheet di pulizia (CleanGenius/Personalizza), base stazione, impostazioni MopExtend™."
+  },
+  {
+    "id": "visioneviva",
+    "name": "VisioneViva",
+    "description": "Catalogo film e serie TV in stile cinema: griglia copertine (al cinema, popolari, tendenze), ricerca, scheda con trama e dati, cast con 5 attori, drill-down sugli attori, dove vederlo in str"
+  },
+  {
+    "id": "zigbee-watchdog",
+    "name": "Zigbee Watchdog",
+    "description": "Tiene una lista live dei dispositivi zigbee2mqtt offline e notifica quando uno cade. Anti-spam al riavvio HA con grace window di 120s. Auto-installa il package HA con sensori, automazioni e "
+  }
+]
