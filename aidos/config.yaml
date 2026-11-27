@@ -1,5 +1,5 @@
 name: AIDOS Home
-version: "0.5.0"
+version: "0.7.0"
 slug: aidos
 description: "Dashboard card-first per Home Assistant, template AIDOS, notifiche e assistente"
 arch:
