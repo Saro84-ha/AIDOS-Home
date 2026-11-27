@@ -1,5 +1,4 @@
-/* AIDOS Home 0.7.0 — original implementation inspired by the configuration workflow of Oikos.
- * Card catalog metadata from user-provided backup; no Oikos runtime or personal data included. */
+/* AIDOS Home 0.9.0 — standalone Home Assistant interface. */
 'use strict';
 const $=q=>document.querySelector(q);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

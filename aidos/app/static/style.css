@@ -122,3 +122,18 @@ main{padding-bottom:115px!important}
 .manager-coming{padding:20px;color:#5d708a}.manager-entry[hidden],.manager-group[hidden]{display:none}
 body.light .catalog-modal,.manager-modal{background:#fff;color:#203047}
 @media (max-width:700px){.topbar{min-height:70px;padding:11px}.top-actions{gap:3px}.top-actions .button{display:none}#bottom-navigation{overflow-x:auto;max-width:none;justify-content:flex-start}.bottomnav-item{flex:0 0 87px}.manager-columns{grid-template-columns:44% 56%}.manager-right{padding:8px}.manager-left{padding:8px}.manager-tabs{padding:0 6px}.manager-tab{padding:12px 8px;font-size:11px}.manager-center-placeholder h3{font-size:15px}.manager-center-placeholder p{font-size:12px}}
+
+/* AIDOS 0.9 — faithful interface patterns, original implementation */
+body.light{--bg:#f9f9fb;--panel:#ffffff;--text:#1b2940;--muted:#60748d;--border:#e1e6ed;--accent:#f4ae45;color-scheme:light}
+body.light .topbar{background:#fffcfa}body.light .topbar .iconbutton{background:transparent;border-color:transparent;color:#4f6079;font-size:23px}
+body.light .topbar .iconbutton:hover{background:#fff0dd;border-color:#ffc37f}
+body.light .topbar .clockwrap strong{color:#172236}body.light .topbar .clockwrap small{color:#5c6e86}
+body.light .bottomnav-item.selected .bottomnav-icon{color:#352c19}
+.manager-entry.active{background:#fff1df!important;border-radius:12px;box-shadow:inset 3px 0 #f1a33f}
+.manager-right{overflow-y:auto;display:flex;justify-content:center;align-items:flex-start}
+.manager-preview-content{width:min(590px,100%);margin:auto;text-align:left;color:#25344a}
+.manager-preview-content .preview-card{margin:18px auto 23px}.manager-preview-content h3{margin:0 0 8px;font-size:23px}
+.manager-preview-content p{color:#65758a;line-height:1.55}.manager-preview-content .button{margin-top:13px}
+.manager-list{padding-bottom:32px}.manager-entry:focus-visible,.bottomnav-item:focus-visible,.manager-tab:focus-visible{outline:2px solid #ee9b28;outline-offset:2px}
+body.light .ring>div{background:white}
+@media(max-width:700px){.manager-preview-content h3{font-size:16px}.manager-preview-content p{font-size:11px}.manager-preview-content .preview-card{padding:10px}.manager-right{padding:8px}.manager-entry{gap:7px}.manager-package{width:32px;height:32px}.manager-entry b{font-size:12px}}

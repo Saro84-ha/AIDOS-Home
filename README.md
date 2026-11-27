@@ -1,17 +1,25 @@
-# AIDOS Home 0.8.0
+# AIDOS Home 0.9.0
 
-App Home Assistant separata: dashboard configurate da zero, template card selezionabili nel catalogo AIDOS, collegamento alle entità esistenti di Home Assistant, notifiche per-card e assistente Conversation.
+Home Assistant app with independent AIDOS interface. Uses Home Assistant API to read entities and send controls.
 
-## Installazione / aggiornamento
+## Installation / update
 
-Copia il contenuto della cartella estratta nella radice di `AIDOS-Home`, commit/push da GitHub Desktop, poi aggiorna repository e app dal catalogo Home Assistant. Mantieni Oikos installato.
+Copy the contents of this folder into the `AIDOS-Home` GitHub repository, commit and push. Refresh the Home Assistant Apps catalog and update AIDOS.
 
-## Cosa replica / cosa non replica
+## Features
 
-Riproduce il flusso di navigazione inferiore, la gestione per raccolte, il catalogo con anteprima e le impostazioni delle schede, usando codice AIDOS originale. Non contiene il server proprietario Oikos, i suoi bundle compilati, i suoi token o le sue verifiche di licenza.
+- Persistent bottom navigation, light dashboard and amber accents
+- Card manager tabs: Cards, Popup, Chips, Badges, Community
+- Searchable categories and interactive preview with compatible entity counts
+- 25 built-in templates, linked to live Home Assistant entity states
+- Card notifications managed in Settings and independently on each card
+- AI chat using Home Assistant Conversation
+- Config stored inside AIDOS app data; fresh installs begin with zero cards
 
-Card: le funzioni semplici (luci, termostati, tapparelle, sensori, media, UPS) usano servizi di Home Assistant. Funzioni specializzate come telecamere live, UI di terze parti e template proprietari avanzati non sono equivalenti al prodotto originale.
+## Licensing and provenance
 
-## Sicurezza
+AIDOS source in this package is independently developed. No proprietary third-party application runtime is bundled. Any required third-party notices must remain intact.
 
-Nessun token HA pubblicato nel repository. Impostazioni AIDOS sotto `/data/settings.json`, dopo il primo avvio. Le azioni sensibili richiedono conferma. Evita la pubblicazione degli archivi completi Oikos su GitHub.
+## Limits
+
+This version does **not** implement the proprietary Oikos runtime or all its specialized card functionality. Avoid publishing private Home Assistant configuration, access tokens or data files.
