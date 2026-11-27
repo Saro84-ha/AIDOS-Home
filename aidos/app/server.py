@@ -28,15 +28,16 @@ SENSITIVE_DOMAINS = {'lock','alarm_control_panel','cover','button','script','aut
 DEFAULT = {
     'title': 'AIDOS Home', 'theme': 'dark', 'accent': '#62c7e9',
     'pages': [
-        {'id':'home','name':'Dashboard','icon':'⌂'},
-        {'id':'lights','name':'Illuminazione','icon':'☀'},
-        {'id':'climate','name':'Riscaldamento','icon':'♨'},
-        {'id':'security','name':'Sicurezza','icon':'◇'},
-        {'id':'media','name':'Multimedia','icon':'♫'},
-        {'id':'energy','name':'Energia','icon':'ϟ'},
-        {'id':'system','name':'Stato sistema','icon':'◎'},
+        {'id':'home','name':'Home','icon':'⌂'},
+        {'id':'cctv','name':'CCTV','icon':'▣'},
+        {'id':'heating','name':'Heating System','icon':'♨'},
+        {'id':'status','name':'Status','icon':'◉'},
+        {'id':'entertainment','name':'Entertainment','icon':'♫'},
+        {'id':'lights','name':'Light','icon':'☀'},
+        {'id':'statistics','name':'Statistiche','icon':'▥'},
     ],
     'cards': [],
+    'layout': {},
     'notifications': {'enabled': False, 'service': 'persistent_notification.create',
                       'cooldown_seconds': 300, 'on_unavailable': True},
     'assistant': {'enabled': True, 'agent_id': ''},
@@ -62,8 +63,23 @@ def clean_settings(obj):
         if not re.fullmatch(r'[a-z0-9_-]+',pid) or pid in ids: continue
         ids.add(pid)
         result['pages'].append({'id':pid,'name':str(p.get('name','Pagina'))[:48], 'icon':str(p.get('icon','▣'))[:4]})
+    layout = obj.get('layout', {})
+    if isinstance(layout, dict):
+        sanitized_layout={}
+        for page_id, groups in layout.items():
+            if page_id not in ids or not isinstance(groups, list): continue
+            clean_groups=[]
+            for group in groups[:40]:
+                if not isinstance(group, list):continue
+                cells=[]
+                for cell in group[:8]:
+                    if not isinstance(cell,list):continue
+                    cells.append([str(cid)[:64] for cid in cell[:50] if isinstance(cid,str)])
+                clean_groups.append(cells)
+            sanitized_layout[page_id]=clean_groups
+        result['layout']=sanitized_layout
     cards = obj.get('cards', [])
-    if not isinstance(cards,list) or len(cards)>500:raise ValueError('Troppe schede')
+    if not isinstance(cards,list) or len(cards)>1000:raise ValueError('Troppe schede')
     result['cards'] = []
     seen=set()
     for c in cards:
@@ -80,7 +96,8 @@ def clean_settings(obj):
             'title':str(c.get('title',''))[:80], 'entity_id':eid,
             'notify':bool(c.get('notify',False)),'notify_on_change':bool(c.get('notify_on_change',True)),
             'notify_state':str(c.get('notify_state',''))[:80],
-            'span':2 if c.get('span')==2 else 1})
+            'span':2 if c.get('span')==2 else 1,
+            'source_template':str(c.get('source_template',''))[:60]})
     noti=obj.get('notifications',{})
     if isinstance(noti,dict):
         service=str(noti.get('service','persistent_notification.create'))
@@ -194,7 +211,7 @@ class Handler(BaseHTTPRequestHandler):
         path=urllib.parse.urlsplit(self.path).path
         try:
             if path in ('/api/health','/health'):
-                return self.respond(200,{'ok':True,'version':'0.3.0','ha_configured':bool(API_TOKEN)})
+                return self.respond(200,{'ok':True,'version':'0.4.0','ha_configured':bool(API_TOKEN)})
             if path=='/api/settings':return self.respond(200,read_settings())
             if path=='/api/states':return self.respond(200,ha_request('GET','states'))
             if path=='/api/agents':return self.respond(200,ha_request('GET','conversation/agents'))

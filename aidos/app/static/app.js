@@ -2,7 +2,7 @@
 'use strict';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const initialPages=['home','lights','climate','security','media','energy','system'];
+const initialPages=['home','cctv','heating','status','entertainment','lights','statistics'];
 const templates=[
  {type:'entity',label:'Stato entità',domains:[]},{type:'light',label:'Luce dimmer / colore',domains:['light']},
  {type:'thermostat',label:'Termostato',domains:['climate']},{type:'sensor',label:'Sensore temperatura / umidità',domains:['sensor']},
@@ -19,8 +19,30 @@ const templates=[
  {type:'water',label:'Perdite / fumo / gas',domains:['binary_sensor']},
  {type:'number',label:'Valore numerico',domains:['number','input_number']},
  {type:'select',label:'Selezione opzioni',domains:['select','input_select']},
+ {type:'room',label:'Panoramica stanza',domains:[]},
+ {type:'gate',label:'Cancello / garage',domains:['cover','switch','button']},
+ {type:'water_meter',label:'Contatori acqua',domains:['sensor']},
+ {type:'ups',label:'UPS e alimentazione',domains:['sensor']},
+ {type:'waste',label:'Raccolta differenziata',domains:['calendar','sensor']},
+ {type:'shopping',label:'Lista della spesa',domains:['todo']},
+ {type:'irrigation',label:'Irrigazione',domains:['switch']},
+ {type:'ev',label:'Ricarica auto elettrica',domains:['sensor','switch']},
+ {type:'mailbox',label:'Cassetta postale',domains:['binary_sensor']},
+ {type:'solar',label:'Fotovoltaico / accumulo',domains:['sensor']},
+ {type:'air_conditioner',label:'Condizionatore',domains:['climate']},
+ {type:'heat_pump',label:'Pompa di calore',domains:['climate']},
+ {type:'air_quality',label:'Qualità aria',domains:['sensor']},
+ {type:'presence',label:'Presenza e occupazione',domains:['person','binary_sensor']},
+ {type:'hazard',label:'Fumo / gas / acqua',domains:['binary_sensor']},
+ {type:'robot_mower',label:'Robot tagliaerba',domains:['lawn_mower','vacuum']},
+ {type:'clock',label:'Orologio',domains:[]},
+ {type:'imageflow',label:'Flussi energia (riepilogo)',domains:['sensor']},
+ {type:'popup',label:'Gruppo di card',domains:[]},
+ {type:'graph',label:'Grafico / storico',domains:['sensor']},
+ {type:'badge',label:'Indicatore di stato',domains:[]},
+
 ];
-const icons={light:'☼',thermostat:'♨',sensor:'◉',lock:'♢',cover:'▤',camera:'▣',media:'♫',energy:'ϟ',battery:'▰',alarm:'⚑',motion:'◌',door:'▥',air:'≈',fan:'✺',vacuum:'◍',scene:'✧',switch:'⏻',weather:'☁',person:'♙',calendar:'▦',zigbee:'⌁',water:'⚠',entity:'◈',number:'#',select:'☷'};
+const icons={light:'☼',thermostat:'♨',sensor:'◉',lock:'♢',cover:'▤',camera:'▣',media:'♫',energy:'ϟ',battery:'▰',alarm:'⚑',motion:'◌',door:'▥',air:'≈',fan:'✺',vacuum:'◍',scene:'✧',switch:'⏻',weather:'☁',person:'♙',calendar:'▦',zigbee:'⌁',water:'⚠',entity:'◈',number:'#',select:'☷',room:'⌂',gate:'▤',water_meter:'◉',ups:'▰',waste:'♻',shopping:'☷',irrigation:'≈',ev:'⚡',mailbox:'✉',solar:'☀',air_conditioner:'❄',heat_pump:'♨',air_quality:'◌',presence:'♙',hazard:'⚠',robot_mower:'◍',clock:'◷',imageflow:'ϟ',popup:'▦',graph:'▥',badge:'◈'};
 const state={cfg:null,entities:[],page:'home',editing:null,connected:false,chatId:'',lastSync:0};
 const entityMap=()=>new Map(state.entities.map(x=>[x.entity_id,x]));
 const domain=e=>(e||'').split('.')[0];
@@ -38,9 +60,21 @@ function countDomain(d){return state.entities.filter(x=>domain(x.entity_id)===d)
 function renderDashboard(){const cs=state.cfg.cards.filter(c=>c.page===state.page);const on=state.entities.filter(e=>(['light','switch'].includes(domain(e.entity_id)))&&e.state==='on').length;
  const unavailable=state.entities.filter(e=>e.state==='unavailable').length;
  let top='';if(state.page==='home')top=`<div class="intro"><div><h2>Bentornato nella tua Smart Home</h2><p>Una sola interfaccia per gestire stanze, dispositivi e sicurezza. Aggiornamento automatico ogni 10 secondi.</p></div><span class="pill ${state.connected?'live':''}">${state.connected?'● Connesso':'● Offline'}</span></div><div class="summary"><div class="tile"><span class="icon">⌂</span><div class="hint">Entità disponibili</div><strong>${state.entities.length}</strong></div><div class="tile"><span class="icon">☼</span><div class="hint">Luci / switch accesi</div><strong>${on}</strong></div><div class="tile"><span class="icon">♨</span><div class="hint">Termostati</div><strong>${countDomain('climate')}</strong></div><div class="tile"><span class="icon">⚑</span><div class="hint">Entità non disponibili</div><strong>${unavailable}</strong></div></div>`;
- return `${top}<div class="row" style="justify-content:space-between"><div class="section-title">${esc(getPage()?.name||'Le tue schede')}</div><span class="small">${cs.length} card configurate</span></div>${cs.length?`<div class="cards">${cs.map(renderCard).join('')}</div>`:`<div class="empty"><div style="font-size:38px">▦</div><h3>Personalizza questa pagina</h3><p>Seleziona un template e associa una delle tue entità Home Assistant.</p><button class="button" data-action="addcard">＋ Aggiungi la prima card</button></div>`}`;
+ return `${top}<div class="row" style="justify-content:space-between"><div class="section-title">${esc(getPage()?.name||'Le tue schede')}</div><span class="small">${cs.length} card configurate</span></div>${cs.length?renderLayout(cs):`<div class="empty"><div style="font-size:38px">▦</div><h3>Personalizza questa pagina</h3><p>Seleziona un template e associa una delle tue entità Home Assistant.</p><button class="button" data-action="addcard">＋ Aggiungi la prima card</button></div>`}`;
 }
-function renderCard(c){const e=entityMap().get(c.entity_id);const attrs=e?.attributes||{};const raw=e?.state??'Non configurato';const icon=icons[c.type]||'◈';const typ=c.type;let val=esc(raw),aux='';const isOn=raw==='on'||raw==='open'||raw==='unlocked';
+function renderLayout(cards){
+ const index=new Map(cards.map(c=>[c.id,c]));const layout=state.cfg.layout?.[state.page];
+ if(!Array.isArray(layout)||!layout.length)return `<div class="cards">${cards.map(renderCard).join('')}</div>`;
+ const used=new Set();let html='';
+ for(const row of layout){if(!Array.isArray(row))continue;
+ const cells=row.map(ids=>Array.isArray(ids)?ids.map(id=>index.get(id)).filter(Boolean):[]).filter(arr=>arr.length);
+ if(!cells.length)continue;
+ html+=`<div class="aidos-layout-row" style="--cols:${Math.min(4,cells.length)}">`+cells.map(items=>`<div class="aidos-layout-cell">${items.map(c=>{used.add(c.id);return renderCard(c)}).join('')}</div>`).join('')+'</div>';
+ }
+ const rest=cards.filter(c=>!used.has(c.id));if(rest.length)html+=`<div class="cards">${rest.map(renderCard).join('')}</div>`;
+ return html;
+}
+function renderCard(c){const e=entityMap().get(c.entity_id);const attrs=e?.attributes||{};const raw=e?.state??'Non configurato';const icon=icons[c.type]||'◈';const typ=c.type;let val=esc(raw),aux='';if(!e&&c.source_template){val='Da collegare';aux=`<div class="small">Template importato: ${esc(c.source_template)} · associa un’entità tramite ⚙</div>`;}const isOn=raw==='on'||raw==='open'||raw==='unlocked';
  if(c.type==='thermostat'&&e){val=`${esc(attrs.current_temperature??'—')}°`;aux=`<div class="small">Target: ${esc(attrs.temperature??'—')}° · ${esc(raw)}</div>`}
  else if(['energy','sensor','battery','air','number'].includes(typ)&&e){val=esc(raw)+' '+esc(unit(e));if(typ==='battery'&&number(raw)!==null)aux=`<div class="card-meter"><div style="width:${Math.max(0,Math.min(100,Number(raw)))}%"></div></div>`}
  else if(c.type==='weather'&&e){val=esc(raw);aux=`<div class="small">${esc(attrs.temperature??'—')}° · umidità ${esc(attrs.humidity??'—')}%</div>`}
@@ -59,7 +93,7 @@ function renderCard(c){const e=entityMap().get(c.entity_id);const attrs=e?.attri
    if(['number','input_number','select','input_select'].includes(dom))buttons=`<button class="button secondary" data-action="adjust" data-card="${esc(c.id)}">Modifica</button>`;
    if(dom==='light'&&attrs.supported_color_modes?.some(x=>x!=='onoff'))buttons+=`<button class="button secondary" data-action="light" data-card="${esc(c.id)}">Luminosità</button>`;
  }
- return `<article class="card ${c.span===2?'span2':''}"><div class="card-top"><div class="card-icon">${icon}</div><div class="card-meta"><div class="card-title">${esc(c.title||friendly(e)||typ)}</div><div class="card-sub">${esc(c.entity_id||'Nessuna entità')}</div></div><button class="card-gear" data-action="editcard" data-card="${esc(c.id)}" title="Configura card">⚙</button></div><div class="card-state">${val}</div>${aux}<div class="row">${badge}${e?.state==='unavailable'?'<span class="pill">Offline</span>':''}</div><div class="card-actions">${buttons}</div></article>`;
+ return `<article class="card ${c.span===2?'span2':''}"><div class="card-top"><div class="card-icon">${icon}</div><div class="card-meta"><div class="card-title">${esc(c.title||friendly(e)||typ)}</div><div class="card-sub">${esc(c.entity_id||c.source_template||'Nessuna entità')}</div></div><button class="card-gear" data-action="editcard" data-card="${esc(c.id)}" title="Configura card">⚙</button></div><div class="card-state">${val}</div>${aux}<div class="row">${badge}${e?.state==='unavailable'?'<span class="pill">Offline</span>':''}</div><div class="card-actions">${buttons}</div></article>`;
 }
 function renderSettings(){const c=state.cfg,n=c.notifications,a=c.assistant;return `<div class="settings-grid"><section class="settings-panel"><h2>🎨 Aspetto e interfaccia</h2><p>Preferenze di visualizzazione AIDOS.</p><div class="field"><label>Nome della casa</label><input id="home-title" value="${esc(c.title)}" maxlength="80"></div><div class="field"><label>Tema</label><select id="theme"><option value="dark" ${c.theme==='dark'?'selected':''}>Scuro professionale</option><option value="light" ${c.theme==='light'?'selected':''}>Chiaro</option></select></div><div class="field"><label>Colore accento</label><input type="color" id="accent" value="${esc(c.accent)}"></div><button class="button" data-action="saveappearance">Salva aspetto</button></section>
  <section class="settings-panel" id="notifications"><h2>🔔 Notifiche</h2><p>Centro di controllo generale. Dopo l'attivazione, abilita le notifiche su ogni singola card attraverso ⚙. Il monitoraggio continua finché AIDOS è avviato.</p><label class="checkline"><input type="checkbox" id="notif-enabled" ${n.enabled?'checked':''}> Attiva notifiche globali</label><div class="field"><label>Servizio di destinazione</label><input id="notif-service" value="${esc(n.service)}" placeholder="persistent_notification.create o notify.mobile_app_..."></div><div class="field"><label>Intervallo minimo per lo stesso stato (secondi)</label><input type="number" id="notif-cooldown" min="30" max="86400" value="${n.cooldown_seconds}"></div><label class="checkline"><input type="checkbox" id="notif-unavailable" ${n.on_unavailable?'checked':''}> Notifica stati sconosciuto / non disponibile</label><div class="row"><button class="button" data-action="savenotifications">Salva notifiche</button><button class="button secondary" data-action="testnotification">Invia prova</button></div><p class="notice">Nessun invio finché la funzione globale e quella della card non sono abilitate. Polling ogni 15 secondi; le modifiche brevi potrebbero non essere rilevate.</p></section>
@@ -80,7 +114,7 @@ function numericEditor(id,mode){const c=state.cfg.cards.find(x=>x.id===id),e=ent
 async function assistant(){if(!state.cfg.assistant.enabled){toast('Attiva l’assistente nelle impostazioni',true);return}state.chatId='';modal('✧ Assistente AIDOS',`<div class="notice">Interagisci con l'agente Conversation di Home Assistant. I comandi disponibili dipendono dall'agente e dalle entità esposte.</div><div class="chatlog" id="chatlog"><div class="bubble">Ciao! Sono l'assistente AIDOS. Come posso aiutarti con la tua casa?</div></div><form id="chat-form" class="chatbar"><input class="search" id="chat-input" maxlength="1200" autocomplete="off" placeholder="Es. Qual è la temperatura in soggiorno?" required><button class="button" type="submit">Invia</button></form>`);$('.modal').classList.add('chat');$('#chat-form').addEventListener('submit',async e=>{e.preventDefault();const inp=$('#chat-input'),s=inp.value.trim();if(!s)return;inp.value='';const log=$('#chatlog');const b=document.createElement('div');b.className='bubble user';b.textContent=s;log.append(b);const pending=document.createElement('div');pending.className='bubble';pending.textContent='Elaborazione…';log.append(pending);log.scrollTop=log.scrollHeight;try{const r=await api('assistant','POST',{text:s,conversation_id:state.chatId});state.chatId=r.conversation_id||state.chatId;pending.textContent=r.response?.speech?.plain?.speech||r.response?.speech?.ssml?.speech||JSON.stringify(r.response||r)}catch(err){pending.textContent='Errore: '+err.message}log.scrollTop=log.scrollHeight;});}
 async function refresh(){try{const d=await api('states');if(!Array.isArray(d))throw Error('Stati non validi');state.entities=d;state.connected=true;state.lastSync=Date.now();render()}catch(e){state.connected=false;render();}}
 async function handleAction(el){const a=el.dataset.action;try{if(a==='closemodal')closeModal();if(a==='addcard')cardEditor();if(a==='editcard')cardEditor(el.dataset.card);
- if(a==='savecard'){const id=state.editing;const entity=$('#entity-search').value.trim();const selected=$('#card-entity').value;const exact=entity || selected || '';const c={id,page:state.page,type:$('#card-type').value,title:$('#card-title').value,entity_id:exact,span:Number($('#card-span').value),notify:$('#card-notify').checked,notify_on_change:$('#card-notify-change').checked,notify_state:$('#card-notify-state').value.trim()};state.cfg.cards=state.cfg.cards.filter(x=>x.id!==id).concat(c);await persist();closeModal();toast('Scheda salvata');}
+ if(a==='savecard'){const id=state.editing;const entity=$('#entity-search').value.trim();const selected=$('#card-entity').value;const exact=entity || selected || '';const c={id,page:state.page,type:$('#card-type').value,title:$('#card-title').value,entity_id:exact,span:Number($('#card-span').value),notify:$('#card-notify').checked,notify_on_change:$('#card-notify-change').checked,notify_state:$('#card-notify-state').value.trim(),source_template:state.cfg.cards.find(x=>x.id===id)?.source_template||''};state.cfg.cards=state.cfg.cards.filter(x=>x.id!==id).concat(c);await persist();closeModal();toast('Scheda salvata');}
  if(a==='deletecard'){if(confirm('Eliminare questa scheda?')){state.cfg.cards=state.cfg.cards.filter(x=>x.id!==state.editing);await persist();closeModal();}}
  if(a==='saveappearance'){state.cfg.title=$('#home-title').value;state.cfg.theme=$('#theme').value;state.cfg.accent=$('#accent').value;await persist();toast('Aspetto salvato')}
  if(a==='savenotifications'){state.cfg.notifications={enabled:$('#notif-enabled').checked,service:$('#notif-service').value.trim(),cooldown_seconds:Number($('#notif-cooldown').value),on_unavailable:$('#notif-unavailable').checked};await persist();toast('Impostazioni notifiche salvate')}

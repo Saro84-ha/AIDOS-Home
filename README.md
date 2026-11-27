@@ -1,66 +1,34 @@
-# AIDOS Home — Smart Home Control
+# AIDOS Home 0.4.0
 
-**Versione 0.3.0 (sviluppo)** — Dashboard professionale, autonoma e modulare per Home Assistant, ispirata all'organizzazione funzionale di Oikos. Tutto il codice è una nuova implementazione: **non** include file di Oikos, configurazioni, licenze o token ricavati dagli archivi forniti.
+Dashboard indipendente per Home Assistant Supervisor, con interfaccia originale ispirata all'organizzazione delle pagine Oikos.
 
-## Funzioni incluse
+## Funzionalità
+- Layout a righe / colonne con importazione delle sette pagine e delle associazioni alle schede da un backup personale Oikos.
+- Oltre 40 categorie di template; alcune card importate sono visualizzazioni generiche e richiedono collegamento manuale a entità HA.
+- Comandi HA per luci, clima, serrature, tapparelle, media, switch e dispositivi supportati.
+- Notifiche **Menu → Impostazioni → Notifiche**, disabilitate di default, e controllo per card.
+- Assistente AI tramite API Conversation di Home Assistant (agente HA da configurare).
+- Configurazione persistente in `/data` e import/export privato dalla dashboard.
 
-- Menu laterale con Dashboard, Illuminazione, Riscaldamento, Sicurezza, Multimedia, Energia, Stato sistema e pagine personalizzate.
-- Editor card: creazione, modifica, eliminazione; card standard o a doppia larghezza.
-- 25 template (luci, termostati, porte, tapparelle, serrature, sensori, Zigbee, allarme, energia, UPS, robot, media, persone, calendario, meteo, scene, ventole e altri).
-- Lettura periodica degli stati da Home Assistant; comandi per i domini supportati.
-- **Menu → Impostazioni → Notifiche**: attivazione globale, servizio `persistent_notification.create` o `notify.*`, cooldown e opzione unavailable. **Ogni card ha la propria attivazione notifiche**. Monitoraggio lato server anche a dashboard chiusa, a intervalli di 15 secondi, senza notificare lo stato iniziale dopo l'avvio.
-- Assistente conversazionale tramite `conversation/process` di Home Assistant, con agente configurabile. AI generativa solo se installata e configurata in Home Assistant.
-- Backup/importazione JSON della configurazione, temi chiaro/scuro, funzionamento responsive, interfaccia in italiano.
-- Dati personali su volume persistente `/data`, non in GitHub. Nessun token esposto nel browser. Ingress gestisce l'autenticazione.
+## Aggiornamento da 0.3
+1. Conservare una copia della configurazione AIDOS usando Impostazioni → Esporta.
+2. Copiare i file di questa cartella nella directory locale GitHub `AIDOS-Home`, **senza copiare il backup Oikos**.
+3. GitHub Desktop → Commit → Push origin.
+4. In Home Assistant → Apps → AIDOS Home, aggiornare alla 0.4.0 (potrebbe occorrere ricaricare il catalogo).
+5. Mantenere Oikos installato: non è coinvolto dalla procedura.
 
-## Installazione via GitHub su Home Assistant OS / Supervised
+## Importazione privata delle tue dashboard Oikos
+**Non aggiungere il backup `oikos.tar.gz` o il JSON esportato al repository pubblico.**
 
-1. Crea un repository GitHub (es. `AIDOS-Home`) e carica **il contenuto di questa cartella** nella root. Non caricare file Oikos o archivi privati.
-2. In `repository.yaml`, sostituisci `YOUR_USERNAME` con il tuo account GitHub.
-3. Home Assistant → Impostazioni → Apps → Store → menu ⋮ → Repository → aggiungi `https://github.com/TUO_UTENTE/AIDOS-Home`.
-4. Aggiorna l'elenco, apri **AIDOS Home**, installa e avvia. Attiva "Mostra nella barra laterale".
-5. Apri **AIDOS**, vai su una pagina e aggiungi le prime card selezionando le tue entità.
-6. In **Impostazioni → Notifiche** configura un servizio reale di notifica, attiva la funzione globale e attivala solo nelle card interessate.
-7. In **Impostazioni → Assistente AI** lascia vuoto l'agente per usare il Conversation predefinito, oppure specifica un `agent_id` configurato in HA.
+Sul tuo PC Windows, se Python è installato, apri PowerShell in una cartella **fuori dal repository** e lancia:
 
-### Aggiornamenti
-
-Esegui commit dei nuovi sorgenti e incrementa **`aidos/config.yaml` → `version`**. Dopo l'aggiornamento dell'indice Apps, Home Assistant può proporre la nuova versione. AIDOS salva la configurazione nel volume `/data` anche tra gli aggiornamenti. L'installazione di app da sorgente GitHub richiede un'istanza HA con Supervisor. **Home Assistant Container puro non supporta Apps**: in quel caso serve deployment Docker separato (non incluso in questa prima release).
-
-## Sicurezza e limiti della versione
-
-- Non pubblicare mai `oikos.tar.gz`, `Oikos_Full_Backup.zip`, `oikos-config.json`, token, chiavi o indirizzi privati.
-- Le card camera, allarme, calendario, Zigbee e apertura rilevano lo stato, ma non hanno ancora player video, arm/disarm, storico eventi avanzato o gestione firmware Zigbee.
-- Notifiche: cambiamento di stato, non un motore di regole complesse; polling a 15 secondi, eventi transitori potrebbero non essere visti. Necessaria scelta di `notify.mobile_app_*` per notifiche push reali.
-- L'assistente delega a Home Assistant Conversation: può rispondere a comandi di controllo solo se l'agente ha accesso alle entità e alle funzioni abilitate in HA.
-- **Comandi su serrature, tapparelle, script e automazioni chiedono conferma.** Non esporre indiscriminatamente entità critiche all'AI.
-- Test automatizzati backend inclusi, ma **non testato sul server reale né su un'istanza Supervisor**: prima installazione di prova e backup Home Assistant consigliati.
-- Per autorizzazioni e aggiornamenti il codice dovrebbe essere valutato prima dell'esposizione pubblica del repository. Ingress evita una porta esterna, ma il backend ha accesso privilegiato all'API HA.
-
-## Sviluppo locale
-
-```bash
-cd aidos/app
-AIDOS_DATA_DIR=/tmp/aidos-test AIDOS_PORT=8099 python3 server.py
+```powershell
+py "C:\Users\rgian\Documents\GitHub\AIDOS-Home\tools\import_oikos.py" "C:\percorso\privato\oikos.tar.gz" --output "C:\percorso\privato\AIDOS-settings-PRIVATE.json"
 ```
 
-La UI si apre su `http://localhost:8099` ma senza il token Supervisor la connessione HA non funzionerà. Per test con HA separato si possono impostare `AIDOS_HA_URL` e `AIDOS_HA_TOKEN` nell'ambiente locale (**mai committarli**).
+Sostituisci i percorsi con quelli reali, quindi in AIDOS apri **Impostazioni → Importa configurazione** e seleziona il JSON. L'importazione sostituisce le impostazioni AIDOS correnti: effettua un'esportazione preventiva.
 
-```bash
-python3 -m unittest discover -s tests -v
-```
+## Privacy e limiti
+Questo repository contiene **solo codice originale AIDOS**. L'importer legge il backup locale e importa esclusivamente la disposizione delle pagine, i nomi delle card e una singola entità per scheda dove identificabile. Non importa codice Oikos, i suoi bundle commerciali, i plugin, licenze, password, URL privati, token né gli asset grafici. Gli ID delle entità possono essere informazioni private: non pubblicare l'output dell'importer.
 
-## Struttura
-
-```
-repository.yaml
-README.md
-aidos/
-  config.yaml
-  Dockerfile
-  app/
-    server.py
-    static/{index.html,style.css,app.js}
-tests/
-  test_server.py
-```
+La ricostruzione delle card avanzate di Oikos (grafici complessi, pop-up interattivi, layout speciali e CCTV live) non è completa; per queste funzioni sono necessarie ulteriori implementazioni originali e verifiche su Home Assistant reale. Non è stato eseguito un test end-to-end con l'istanza domestica.
