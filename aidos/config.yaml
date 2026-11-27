@@ -1,7 +1,7 @@
 name: AIDOS Home
-version: "0.7.0"
+version: "0.8.0"
 slug: aidos
-description: "Dashboard card-first per Home Assistant, template AIDOS, notifiche e assistente"
+description: "Interfaccia per Home Assistant con catalogo, card, notifiche e assistente AI"
 arch:
   - amd64
   - aarch64

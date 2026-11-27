@@ -25,9 +25,12 @@ function renderBottomNav(){
  $('#bottom-navigation').innerHTML=items.join('');
 }
 function render(){if(!state.cfg)return;document.body.classList.toggle('light',state.cfg.theme==='light');document.documentElement.style.setProperty('--accent',state.cfg.accent);renderNav();const p=state.cfg.pages.find(x=>x.id===state.page);$('#page-title').textContent=state.page==='settings'?'Impostazioni':p?.name||'Dashboard';$('#eyebrow').textContent=state.page==='settings'?'CONFIGURAZIONE / SISTEMA':'CASA / '+(p?.name||'PANORAMICA').toUpperCase();$('#edit-layout').style.display=state.page==='settings'?'none':'';$('#content').innerHTML=state.page==='settings'?settings():dashboard();$('#conn-dot').classList.toggle('ok',state.connected);$('#conn-text').textContent=state.connected?'HOME ASSISTANT · ONLINE':'HOME ASSISTANT · OFFLINE';$('#edit-layout').textContent=state.editMode?'✓ Fine modifica':'+ Aggiungi card';}
-function dashboard(){const cards=state.cfg.cards.filter(c=>c.page===state.page);const l=state.entities.filter(e=>dom(e.entity_id)==='light'&&e.state==='on').length;const bad=state.entities.filter(e=>e.state==='unavailable').length;
- const welcome=state.page==='home'?`<div class="home-overview"><span class="online-status">● ${state.connected?'Home Assistant collegato':'Connessione non disponibile'}</span><span>${state.entities.length} entità</span><span>${l} luci accese</span><span>${bad} non disponibili</span><button class="button secondary" data-action="refresh">↻ Aggiorna</button></div>`:'';
- return welcome+`<div class="sectionhead"><div><div class="overline">AIDOS · LA TUA CASA</div><h2>${esc(state.cfg.pages.find(x=>x.id===state.page)?.name||'Le tue schede')}</h2></div><div class="row"><span class="small">${cards.length} card</span><button class="button secondary" data-action="addcard">+ Nuova card</button></div></div>`+(cards.length?`<div class="cards">${cards.map(card).join('')}</div>`:`<div class="empty"><div class="emptyicon">▦</div><h3>La dashboard è pronta per essere personalizzata</h3><p>Aggiungi una card dal catalogo AIDOS e collegala a un'entità riconosciuta da Home Assistant.</p><button class="button" data-action="addcard">+ Apri catalogo card</button></div>`);
+function dashboard(){
+ const cards=state.cfg.cards.filter(c=>c.page===state.page);
+ const lit=state.entities.filter(e=>dom(e.entity_id)==='light'&&e.state==='on').length;
+ const unavailable=state.entities.filter(e=>e.state==='unavailable').length;
+ const greeting=`<div class="compact-summary"><span class="summary-pill"><b class="status-pulse"></b>${state.connected?'Casa collegata':'Connessione assente'}</span><span class="summary-pill">${state.entities.length} entità</span><span class="summary-pill">${lit} luci accese</span><span class="summary-pill">${unavailable} non disponibili</span></div>`;
+ return (state.page==='home'?greeting:'')+`<div class="page-section"><div class="sectionhead"><div><div class="overline">LE TUE CARD</div><h2>${esc(state.cfg.pages.find(x=>x.id===state.page)?.name||'Dashboard')}</h2></div><div class="row"><span class="small">${cards.length} card</span><button class="button secondary" data-action="addcard">＋ Aggiungi card</button></div></div>${cards.length?`<div class="cards">${cards.map(card).join('')}</div>`:`<div class="empty original-empty"><div class="emptyicon">▦</div><h3>Nessuna card configurata</h3><p>Apri il catalogo, seleziona un template AIDOS e collegalo a una delle entità rilevate da Home Assistant.</p><button class="button" data-action="addcard">＋ Aggiungi la prima card</button></div>`}</div>`;
 }
 function pctRing(value,sub='',color='var(--accent)'){let n=clamp(num(value)??0,0,100);return `<div class="ring" style="--pct:${n};--ring:${color}"><div><strong>${esc(value??'—')}</strong><span>${esc(sub)}</span></div></div>`;}
 function card(c){const e=emap().get(c.entity_id);const a=e?.attributes||{};const raw=e?.state??'Da configurare';const d=dom(c.entity_id);const active=['on','open','unlocked','home','playing','heat','cool'].includes(raw);const type=c.type;const title=c.title||state.catalog.find(x=>x.id===type)?.name||type;const ico=glyph[type]||'◈';const related=state.entities.filter(x=>x.entity_id===c.entity_id);let inner='';
@@ -80,6 +83,17 @@ const catalogGroups={
  'Robot e dispositivi':['vacuum','robot-dream-a1-pro']
 };
 function categoryFor(id){return Object.entries(catalogGroups).find(([,ids])=>ids.includes(id))?.[0]||'Altre card';}
+function cardManager(tab='cards'){
+ state.catalogTab=tab;
+ const tabs=[['cards','Cards'],['popup','Popup'],['chips','Chips'],['badges','Badges'],['community','Community']];
+ const group=(title,subset)=>`<div class="manager-group"><div class="manager-group-title">${esc(title)} <span>${subset.length}</span></div>${subset.map(x=>`<button class="manager-entry" data-catalog-manager="${esc(x.id)}"><span class="manager-package">⬡</span><span><b>${esc(x.name)}</b><small>${esc(x.description||'Card AIDOS')}</small><em>LOCAL · AIDOS</em></span><i>›</i></button>`).join('')}</div>`;
+ const grouped=[...new Set(state.catalog.map(x=>categoryFor(x.id)))];
+ const content=tab==='cards'?grouped.map(g=>group(g,state.catalog.filter(x=>categoryFor(x.id)===g))).join(''):
+ `<div class="manager-coming"><strong>${esc(tabs.find(x=>x[0]===tab)?.[1])}</strong><p>Questa raccolta è predisposta. Per ora scegli le card disponibili nella sezione Cards; non vengono installati componenti di terze parti.</p></div>`;
+ const body=`<div class="manager-wrap"><div class="manager-tabs">${tabs.map(([v,t])=>`<button class="manager-tab ${tab===v?'active':''}" data-action="manager-tab" data-tab="${v}">${esc(t)}</button>`).join('')}</div><div class="manager-columns"><div class="manager-left"><button class="manager-create" data-action="addcard">✧ Create card</button><label class="visually-hidden" for="manager-search">Cerca card</label><input id="manager-search" class="catalog-search" placeholder="⌕ Cerca cards..."><div class="manager-list">${content}</div></div><div class="manager-right"><div class="manager-center-placeholder"><div class="manager-bigicon">⬡</div><h3>Catalogo AIDOS</h3><p>Seleziona una card per aprire il pannello delle anteprime e collegare le entità di Home Assistant.</p><button class="button" data-action="addcard">＋ Add card</button></div></div></div></div>`;
+ modal('Gestione card',body);$('.modal').classList.add('manager-modal');
+ const search=$('#manager-search');if(search)search.addEventListener('input',e=>{const val=e.target.value.toLowerCase();document.querySelectorAll('.manager-entry').forEach(n=>n.hidden=!n.textContent.toLowerCase().includes(val));document.querySelectorAll('.manager-group').forEach(g=>g.hidden=!g.querySelector('.manager-entry:not([hidden])'));});
+}
 function editor(id){
  const existing=state.cfg.cards.find(x=>x.id===id);
  if(existing){state.editing=id;return cardConfig(existing,true);}
@@ -131,6 +145,7 @@ async function refresh(){try{const data=await api('states');if(!Array.isArray(da
 async function action(el){const a=el.dataset.action;try{
  if(a==='closemodal')closeModal();
  if(a==='catalogtab')changeCatalogTab(el.dataset.tab);
+ if(a==='manager-tab')cardManager(el.dataset.tab);
  if(a==='addcard')editor();
  if(a==='choosecard'){const type=el.dataset.type;cardConfig({id:'aidos_'+Date.now().toString(36),page:state.page,type,title:'',entity_id:'',span:1,notify:false,notify_on_change:true,notify_state:''});}
  if(a==='editcard')editor(el.dataset.card);
@@ -149,7 +164,7 @@ async function action(el){const a=el.dataset.action;try{
  if(a==='adjust')adjust(el.dataset.card,el.dataset.mode);
  if(a==='saveadjust'){const c=state.cfg.cards.find(x=>x.id===el.dataset.card),d=dom(c.entity_id),v=+$('#adjust-value').value;const mode=el.dataset.mode;let svc=mode==='thermostat'?'set_temperature':mode==='light'?'turn_on':'set_value';let extra=mode==='thermostat'?{temperature:v}:mode==='light'?{brightness_pct:clamp(v,0,100)}:{value:v};await command(c.id,svc,extra);closeModal();}
  }catch(e){toast(e.message,true);}}
-document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)return navTo(go.dataset.go);const cmd=e.target.closest('[data-cmd]');if(cmd)return command(cmd.dataset.card,cmd.dataset.cmd);const choose=e.target.closest('[data-catalog]');if(choose)return showCatalogPreview(choose.dataset.catalog);const act=e.target.closest('[data-action]');if(act)return action(act);});
-$('#menu-toggle').onclick=()=>$('#sidebar').classList.toggle('open');$('#edit-layout').onclick=()=>editor();$('#assistant-open').onclick=()=>assistant();$('#refresh-now').onclick=()=>refresh();$('#notice-open').onclick=()=>navTo('settings');
-function tick(){$('#clock').textContent=new Date().toLocaleString('it-IT',{weekday:'short',hour:'2-digit',minute:'2-digit'});}tick();setInterval(tick,30000);
+document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go)return navTo(go.dataset.go);const cmd=e.target.closest('[data-cmd]');if(cmd)return command(cmd.dataset.card,cmd.dataset.cmd);const managerChoice=e.target.closest('[data-catalog-manager]');if(managerChoice){const v=managerChoice.dataset.catalogManager;editor();showCatalogPreview(v);return;}const choose=e.target.closest('[data-catalog]');if(choose)return showCatalogPreview(choose.dataset.catalog);const act=e.target.closest('[data-action]');if(act)return action(act);});
+$('#catalog-manager').onclick=()=>cardManager();$('#menu-toggle').onclick=()=>$('#sidebar').classList.toggle('open');$('#edit-layout').onclick=()=>editor();$('#assistant-open').onclick=()=>assistant();$('#refresh-now').onclick=()=>refresh();$('#notice-open').onclick=()=>navTo('settings');
+function tick(){const d=new Date();$('#clock').textContent=d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});$('#clock-date').textContent=d.toLocaleDateString('it-IT',{weekday:'short',day:'numeric',month:'short'});}tick();setInterval(tick,30000);
 (async()=>{try{state.catalog=await fetch('catalog.json').then(r=>r.json());state.cfg=await api('settings');render();await refresh()}catch(e){toast('Avvio AIDOS: '+e.message,true)}})();setInterval(()=>{if(state.cfg)refresh()},12000);

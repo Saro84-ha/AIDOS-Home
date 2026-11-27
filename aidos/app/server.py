@@ -1,4 +1,4 @@
-"""AIDOS Home 0.7: ingress application. Python standard library only.
+"""AIDOS Home 0.8: ingress application. Python standard library only.
 
 Private settings remain under /data; Supervisor credential never sent to client.
 """
